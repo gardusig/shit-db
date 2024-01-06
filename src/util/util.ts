@@ -1,3 +1,5 @@
+type DeepCopyable = Record<string, any> | any[];
+
 function deepCopyMap<K, V>(originalMap: Map<K, V>): Map<K, V> {
   const newMap = new Map();
   originalMap.forEach(
@@ -9,7 +11,7 @@ function deepCopyMap<K, V>(originalMap: Map<K, V>): Map<K, V> {
   return newMap;
 }
 
-function deepCopy<T>(obj: T): T {
+function deepCopy<T extends DeepCopyable>(obj: T | null): T | null {
   if (obj === null || typeof obj !== 'object') {
     return obj;
   }

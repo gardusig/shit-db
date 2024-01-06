@@ -38,7 +38,7 @@ function createSheetToObjectMapper(sheetName: string) {
       );
     },
     getHeaderMap: function () {
-      return deepCopyMap(headerMap);
+      return deepCopy(headerMap);
     },
   };
 }
