@@ -1,24 +1,15 @@
-interface SheetToObjectMapper<T> {
-  getAllRows: () => T[];
-  getRow: (rowIndex: number) => T | null;
-  getRows: (startRowIndex: number, finishRowIndex: number) => T[];
-  getHeaderMap: () => Map<string, number>;
-}
+import {
+  GenericObject,
+  HeaderMap,
+  SheetRow,
+} from './types';
 
-/**
- * Creates a mapper for converting sheet data to objects.
- *
- * @param {string} sheetName The name of the sheet to map.
- * @returns {SheetToObjectMapper<T>} An object with methods for accessing sheet data as objects.
- */
-function createSheetToObjectMapper<T>(sheetName: string): SheetToObjectMapper<T> {
+function createSheetToObjectMapper(sheetName: string) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
   if (sheet === null) {
     throw new Error(`Sheet with name '${sheetName}' not found.`);
   }
-  const sheetRows = sheet
-    .getDataRange()
-    .getValues();
+  const sheetRows: SheetRow[] = sheet.getDataRange().getValues();
   if (sheetRows.length < 1) {
     throw new Error("Empty sheet");
   }
@@ -32,16 +23,16 @@ function createSheetToObjectMapper<T>(sheetName: string): SheetToObjectMapper<T>
     },
     getRowAsObject: function (rowIndex: number) {
       return createObjectList(
-        sheetRows,
         headerMap,
+        sheetRows,
         rowIndex,
         rowIndex,
       );
     },
     getRowsAsObject: function (startRowIndex: number, finishRowIndex: number) {
       return createObjectList(
-        sheetRows,
         headerMap,
+        sheetRows,
         startRowIndex,
         finishRowIndex,
       );
@@ -52,94 +43,50 @@ function createSheetToObjectMapper<T>(sheetName: string): SheetToObjectMapper<T>
   };
 }
 
-/**
- * Creates a header map from the given header row.
- *
- * @param {string[]} sheetHeaderRow The header row containing column names.
- * @returns {Map<string, number>} A map of column names to their indices.
- * @throws {Error} If the header row is empty.
- */
-function createHeaderMap(sheetHeaderRow: string[]): Map<string, number> {
-  const headerMap = new Map<string, number>();
+function createHeaderMap(sheetHeaderRow: SheetRow): HeaderMap {
   if (!sheetHeaderRow || sheetHeaderRow.length === 0) {
     throw new Error("Empty header row");
   }
+  const headerMap: HeaderMap = {};
   sheetHeaderRow.forEach(
-    (columnName, columnIndex) => {
-      headerMap.set(columnName, columnIndex);
+    (sheetCellValue, columnIndex) => {
+      if (typeof sheetCellValue !== 'string') {
+        throw new Error(`Unexpected column name type at index ${columnIndex}`);
+      }
+      headerMap[sheetCellValue] = columnIndex;
     }
   );
   return headerMap;
 }
 
-/**
- * Creates an object from a sheet row and a header map.
- *
- * @param {string[]} sheetRow The row of data to convert.
- * @param {Map<string, number>} headerMap The header map for mapping column names to indices.
- * @returns {object} The created object.
- */
-function createObject(
-  sheetRow,
-  headerMap,
-) {
-  const genericObject = {};
-  for (const [columnName, columnIndex] of headerMap) {
-    addFieldToObject(genericObject, sheetRow, columnName, columnIndex);
-  }
-  return genericObject;
-}
-
-/**
- * Adds a field to an object from a sheet row, header map, and column information.
- *
- * @param {object} genericObject The object to add the field to.
- * @param {string[]} sheetRow The row of data containing the field value.
- * @param {string} columnName The name of the field to add.
- * @param {number} columnIndex The index of the column containing the field value.
- * @throws {Error} If the column index is out of bounds for the sheet row.
- */
-function addFieldToObject(
-  genericObject,
-  sheetRow,
-  columnName,
-  columnIndex,
-) {
-  if (columnIndex > sheetRow.length) {
-    throw new Error(
-      "Column index out of bounds for sheet row"
-      + ", sheetRow: " + sheetRow
-      + ", columnIndex: " + columnIndex
-      + ", columnName: " + columnName
-    )
-  }
-  const cellContent = sheetRow[columnIndex];
-  if (cellContent !== undefined && cellContent !== null && cellContent !== "") {
-    genericObject[columnName] = cellContent;
-  }
-}
-
-/**
- * Creates a list of objects from sheet data, a header map, and optional row range.
- *
- * @param {Map<string, number>} headerMap The header map for mapping column names to indices.
- * @param {string[][]} sheetRows The array of sheet rows containing data.
- * @param {number} [startRowIndex=Number.MIN_SAFE_INTEGER] The starting row index (inclusive).
- * @param {number} [finishRowIndex=Number.MAX_SAFE_INTEGER] The ending row index (exclusive).
- * @returns {object[]} The list of created objects.
- */
 function createObjectList(
-  headerMap: Map<string, number>,
-  sheetRows,
+  headerMap: HeaderMap,
+  sheetRows: SheetRow[],
   startRowIndex = Number.MIN_SAFE_INTEGER,
   finishRowIndex = Number.MAX_SAFE_INTEGER,
-) {
-  const objectList = [];
+): GenericObject[] {
+  const objectList: GenericObject[] = [];
   startRowIndex = Math.max(startRowIndex, 1);
   finishRowIndex = Math.min(finishRowIndex, sheetRows.length);
   for (let rowIndex = startRowIndex; rowIndex < finishRowIndex; rowIndex++) {
-    const genericObject = createObject(sheetRows[rowIndex], headerMap);
+    const genericObject: GenericObject = createObject(headerMap, sheetRows[rowIndex]);
     objectList.push(genericObject);
   }
   return objectList;
+}
+
+function createObject(
+  headerMap: HeaderMap,
+  sheetRow: SheetRow,
+): GenericObject {
+  const genericObject: GenericObject = {};
+  Object.entries(headerMap).forEach(
+    ([columnName, columnIndex]) => {
+      const cellContent = sheetRow[columnIndex];
+      if (cellContent !== undefined && cellContent !== null && cellContent !== "") {
+        genericObject[columnName] = cellContent;
+      }
+    }
+  )
+  return genericObject;
 }
