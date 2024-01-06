@@ -1,4 +1,4 @@
-function deepCopyMap(originalMap) {
+function deepCopyMap<K, V>(originalMap: Map<K, V>): Map<K, V> {
   const newMap = new Map();
   originalMap.forEach(
     (value, key) => {
@@ -9,17 +9,17 @@ function deepCopyMap(originalMap) {
   return newMap;
 }
 
-function deepCopy(obj) {
+function deepCopy<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
     return obj;
   }
   if (Array.isArray(obj)) {
-    return obj.map(deepCopy);
+    return obj.map(deepCopy) as T;
   }
-  const newObj = {};
+  const newObj = {} as T;
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      newObj[key] = deepCopy(obj[key]);
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      newObj[key] = deepCopy((obj as any)[key]);
     }
   }
   return newObj;

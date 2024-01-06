@@ -1,15 +1,21 @@
+interface SheetToObjectMapper<T> {
+  getAllRows: () => T[];
+  getRow: (rowIndex: number) => T | null;
+  getRows: (startRowIndex: number, finishRowIndex: number) => T[];
+  getHeaderMap: () => Map<string, number>;
+}
+
 /**
  * Creates a mapper for converting sheet data to objects.
  *
  * @param {string} sheetName The name of the sheet to map.
- * @returns {object} An object with methods for accessing sheet data as objects.
+ * @returns {SheetToObjectMapper<T>} An object with methods for accessing sheet data as objects.
  */
-function createSheetToObjectMapper(
-  sheetName,
-) {
-  const sheet = SpreadsheetApp
-    .getActiveSpreadsheet()
-    .getSheetByName(sheetName);
+function createSheetToObjectMapper<T>(sheetName: string): SheetToObjectMapper<T> {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (sheet === null) {
+    throw new Error(`Sheet with name '${sheetName}' not found.`);
+  }
   const sheetRows = sheet
     .getDataRange()
     .getValues();
@@ -18,13 +24,13 @@ function createSheetToObjectMapper(
   }
   const headerMap = createHeaderMap(sheetRows[0]);
   return {
-    getAllRowsAsObjectList: function () {
+    getAllRows: function () {
       return createObjectList(
         headerMap,
         sheetRows,
       );
     },
-    getRowAsObject: function (rowIndex) {
+    getRowAsObject: function (rowIndex: number) {
       return createObjectList(
         sheetRows,
         headerMap,
@@ -32,7 +38,7 @@ function createSheetToObjectMapper(
         rowIndex,
       );
     },
-    getRowsAsObject: function (startRowIndex, finishRowIndex) {
+    getRowsAsObject: function (startRowIndex: number, finishRowIndex: number) {
       return createObjectList(
         sheetRows,
         headerMap,
@@ -53,16 +59,16 @@ function createSheetToObjectMapper(
  * @returns {Map<string, number>} A map of column names to their indices.
  * @throws {Error} If the header row is empty.
  */
-function createHeaderMap(
-  sheetHeaderRow,
-) {
-  const headerMap = new Map();
+function createHeaderMap(sheetHeaderRow: string[]): Map<string, number> {
+  const headerMap = new Map<string, number>();
   if (!sheetHeaderRow || sheetHeaderRow.length === 0) {
     throw new Error("Empty header row");
   }
-  for (let columnIndex = 0; columnIndex < sheetHeaderRow.length; columnIndex++) {
-    headerMap.set(sheetHeaderRow[columnIndex], columnIndex);
-  }
+  sheetHeaderRow.forEach(
+    (columnName, columnIndex) => {
+      headerMap.set(columnName, columnIndex);
+    }
+  );
   return headerMap;
 }
 
@@ -123,7 +129,7 @@ function addFieldToObject(
  * @returns {object[]} The list of created objects.
  */
 function createObjectList(
-  headerMap,
+  headerMap: Map<string, number>,
   sheetRows,
   startRowIndex = Number.MIN_SAFE_INTEGER,
   finishRowIndex = Number.MAX_SAFE_INTEGER,
