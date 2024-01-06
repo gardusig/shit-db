@@ -2,9 +2,10 @@ import {
   GenericObject,
   HeaderMap,
   SheetRow,
+  SheetToObjectMapper,
 } from './types';
 
-function createSheetToObjectMapper(sheetName: string) {
+function createSheetToObjectMapper(sheetName: string): SheetToObjectMapper {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
   if (sheet === null) {
     throw new Error(`Sheet with name '${sheetName}' not found.`);
@@ -16,29 +17,24 @@ function createSheetToObjectMapper(sheetName: string) {
   const headerMap = createHeaderMap(sheetRows[0]);
   return {
     getAllRows: function () {
-      return createObjectList(
-        headerMap,
-        sheetRows,
-      );
+      return createObjectList(headerMap, sheetRows);
     },
-    getRowAsObject: function (rowIndex: number) {
-      return createObjectList(
-        headerMap,
-        sheetRows,
-        rowIndex,
-        rowIndex,
-      );
+    getRow: function (rowIndex: number) {
+      const objectList = createObjectList(headerMap, sheetRows, rowIndex, rowIndex);
+      if (objectList.length === 0) {
+        throw new Error("Index out of range");
+      }
+      return objectList[0];
     },
-    getRowsAsObject: function (startRowIndex: number, finishRowIndex: number) {
-      return createObjectList(
-        headerMap,
-        sheetRows,
-        startRowIndex,
-        finishRowIndex,
-      );
+    getRows: function (startRowIndex: number, finishRowIndex: number) {
+      return createObjectList(headerMap, sheetRows, startRowIndex, finishRowIndex);
     },
     getHeaderMap: function () {
-      return deepCopy(headerMap);
+      const copiedMap = deepCopy(headerMap);
+      if (copiedMap === null) {
+        throw new Error("Null header map");
+      }
+      return copiedMap;
     },
   };
 }

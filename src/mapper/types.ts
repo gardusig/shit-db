@@ -6,15 +6,16 @@ type GenericObject = Record<string, SheetCellValue>;
 
 type HeaderMap = Record<string, number>;
 
-interface SheetToObjectMapper<T> {
-    getAllRows: () => T[];
-    getRow: (rowIndex: number) => T | null;
-    getRows: (startRowIndex: number, finishRowIndex: number) => T[];
-    getHeaderMap: () => Map<string, number>;
+interface SheetToObjectMapper {
+    getAllRows: () => GenericObject[];
+    getRow: (rowIndex: number) => GenericObject;
+    getRows: (startRowIndex: number, finishRowIndex: number) => GenericObject[];
+    getHeaderMap: () => HeaderMap;
 }
 
 export {
     GenericObject,
     HeaderMap,
     SheetRow,
+    SheetToObjectMapper,
 };
