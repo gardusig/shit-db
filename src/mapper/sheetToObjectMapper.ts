@@ -5,7 +5,10 @@ import {
   SheetToObjectMapper,
 } from './types';
 
-function createSheetToObjectMapper(sheetName: string, spreadsheetIdOrURL?: string): SheetToObjectMapper {
+function createSheetToObjectMapper(
+  sheetName: string,
+  spreadsheetIdOrURL?: string,
+): SheetToObjectMapper {
   const spreadsheet = getSpreadsheet(spreadsheetIdOrURL);
   if (spreadsheet === null) {
     throw new Error(`Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`);
@@ -95,7 +98,9 @@ function isSpreadsheetUrl(value: string): boolean {
   return value.includes("spreadsheets.google.com");
 }
 
-function getSpreadsheet(spreadsheetIdOrURL?: string): GoogleAppsScript.Spreadsheet.Spreadsheet | null {
+function getSpreadsheet(
+  spreadsheetIdOrURL?: string,
+): GoogleAppsScript.Spreadsheet.Spreadsheet | null {
   if (spreadsheetIdOrURL) {
     if (isSpreadsheetUrl(spreadsheetIdOrURL)) {
       return SpreadsheetApp.openByUrl(spreadsheetIdOrURL);
