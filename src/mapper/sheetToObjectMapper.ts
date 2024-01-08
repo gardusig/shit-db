@@ -5,10 +5,14 @@ import {
   SheetToObjectMapper,
 } from './types';
 
-function createSheetToObjectMapper(sheetName: string): SheetToObjectMapper {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+function createSheetToObjectMapper(sheetName: string, spreadsheetIdOrURL?: string): SheetToObjectMapper {
+  const spreadsheet = getSpreadsheet(spreadsheetIdOrURL);
+  if (spreadsheet === null) {
+    throw new Error(`Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`);
+  }
+  const sheet = spreadsheet.getSheetByName(sheetName);
   if (sheet === null) {
-    throw new Error(`Sheet with name '${sheetName}' not found.`);
+    throw new Error(`Sheet '${sheetName}' not found.`);
   }
   const sheetRows: SheetRow[] = sheet.getDataRange().getValues();
   if (sheetRows.length < 1) {
@@ -86,3 +90,21 @@ function createObject(
   )
   return genericObject;
 }
+
+function isSpreadsheetUrl(value: string): boolean {
+  return value.includes("spreadsheets.google.com");
+}
+
+function getSpreadsheet(spreadsheetIdOrURL?: string): GoogleAppsScript.Spreadsheet.Spreadsheet | null {
+  if (spreadsheetIdOrURL) {
+    if (isSpreadsheetUrl(spreadsheetIdOrURL)) {
+      return SpreadsheetApp.openByUrl(spreadsheetIdOrURL);
+    }
+    return SpreadsheetApp.openById(spreadsheetIdOrURL);
+  }
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+export {
+  createSheetToObjectMapper
+};
