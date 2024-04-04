@@ -18,4 +18,4 @@ export {
     HeaderMap,
     SheetRow,
     SheetToObjectMapper,
-};
+}
