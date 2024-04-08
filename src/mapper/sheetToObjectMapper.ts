@@ -50,14 +50,12 @@ function createObject(
   sheetRow: SheetRow,
 ): GenericObject {
   const genericObject: GenericObject = {}
-  Object.entries(headerMap).forEach(
-    ([columnName, columnIndex]) => {
-      const cellContent = sheetRow[columnIndex]
-      if (cellContent !== undefined && cellContent !== null && cellContent !== '') {
-        genericObject[columnName] = cellContent
-      }
+  for (const [columnName, columnIndex] of Object.entries(headerMap)) {
+    const cellContent = sheetRow[columnIndex]
+    if (cellContent !== undefined && cellContent !== null && cellContent !== '') {
+      genericObject[columnName] = cellContent
     }
-  )
+  }
   return genericObject
 }
 
@@ -66,14 +64,12 @@ function createHeaderMap(sheetHeaderRow: SheetRow): HeaderMap {
     throw new Error('Empty header row')
   }
   const headerMap: HeaderMap = {}
-  sheetHeaderRow.forEach(
-    (sheetCellValue, columnIndex) => {
-      if (typeof sheetCellValue !== 'string') {
-        throw new Error(`Unexpected column name type at index ${columnIndex}`)
-      }
-      headerMap[sheetCellValue] = columnIndex
+  sheetHeaderRow.forEach((sheetCellValue, columnIndex) => {
+    if (typeof sheetCellValue !== 'string') {
+      throw new Error(`Unexpected column name type at index ${columnIndex}`)
     }
-  )
+    headerMap[sheetCellValue] = columnIndex
+  })
   return headerMap
 }
 
