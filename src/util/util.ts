@@ -36,6 +36,11 @@ namespace Util {
       sheet = spreadsheet.insertSheet(sheetName)
     }
     sheet.appendRow(header)
+    const desiredNumColumns = header.length
+    const currentNumColumns = sheet.getLastColumn()
+    if (currentNumColumns > desiredNumColumns) {
+      sheet.deleteColumns(desiredNumColumns + 1, currentNumColumns - desiredNumColumns)
+    }
     return sheet
   }
 }
