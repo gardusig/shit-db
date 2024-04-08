@@ -1,17 +1,4 @@
-type DeepCopyable = Record<string, any> | any[];
-
 namespace Util {
-  export function deepCopyMap<K, V>(originalMap: Map<K, V>): Map<K, V> {
-    const newMap = new Map()
-    originalMap.forEach(
-      (value, key) => {
-        const copiedValue = (typeof value === 'object') ? deepCopy(value) : value
-        newMap.set(key, copiedValue)
-      }
-    )
-    return newMap
-  }
-
   export function deepCopy<T extends DeepCopyable>(obj: T | null): T | null {
     if (obj === null || typeof obj !== 'object') {
       return obj
@@ -27,4 +14,30 @@ namespace Util {
     }
     return newObj
   }
+
+  export function getSpreadsheet(spreadsheetIdOrURL?: string): GoogleAppsScript.Spreadsheet.Spreadsheet | null {
+    if (spreadsheetIdOrURL) {
+      if (isSpreadsheetUrl(spreadsheetIdOrURL)) {
+        return SpreadsheetApp.openByUrl(spreadsheetIdOrURL)
+      }
+      return SpreadsheetApp.openById(spreadsheetIdOrURL)
+    }
+    return SpreadsheetApp.getActiveSpreadsheet()
+  }
+
+  export function createSheet(sheetName: string, header: string[]) {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+    let sheet = spreadsheet.getSheetByName(sheetName)
+    if (sheet) {
+      sheet.clear()
+    }
+    sheet = spreadsheet.insertSheet(sheetName)
+    sheet.appendRow(header)
+  }
 }
+
+function isSpreadsheetUrl(value: string): boolean {
+  return value.includes('spreadsheets.google.com')
+}
+
+type DeepCopyable = Record<string, any> | any[]
