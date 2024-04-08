@@ -25,14 +25,18 @@ namespace Util {
     return SpreadsheetApp.getActiveSpreadsheet()
   }
 
-  export function createSheet(sheetName: string, header: string[]) {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+  export function createSheet(sheetName: string, header: string[], spreadsheet?: GoogleAppsScript.Spreadsheet.Spreadsheet): GoogleAppsScript.Spreadsheet.Sheet {
+    if (spreadsheet === undefined) {
+      spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+    }
     let sheet = spreadsheet.getSheetByName(sheetName)
     if (sheet) {
       sheet.clear()
+    } else {
+      sheet = spreadsheet.insertSheet(sheetName)
     }
-    sheet = spreadsheet.insertSheet(sheetName)
     sheet.appendRow(header)
+    return sheet
   }
 }
 
