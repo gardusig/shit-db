@@ -21,12 +21,21 @@ namespace ObjectToSheetMapper {
             objs.forEach(obj => { this.appendObject(obj) })
         }
 
-        trimSheetRows(): void {
+        trimRows(): void {
             const lastRowWithData = this.sheet.getLastRow()
             const maxRows = this.sheet.getMaxRows()
             const numRowsToRemove = maxRows - lastRowWithData
             if (numRowsToRemove > 0) {
                 this.sheet.deleteRows(lastRowWithData + 1, numRowsToRemove)
+            }
+        }
+
+        trimColumns(): void {
+            const lastColumnWithData = this.sheet.getLastColumn()
+            const maxColumns = this.sheet.getMaxColumns()
+            const columnsToRemove = maxColumns - lastColumnWithData
+            if (columnsToRemove > 0) {
+                this.sheet.deleteColumns(lastColumnWithData + 1, columnsToRemove)
             }
         }
 

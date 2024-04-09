@@ -33,12 +33,6 @@ namespace Util {
       sheet = spreadsheet.insertSheet(sheetName)
     }
     sheet.appendRow(header)
-    const desiredColumns = sheet.getLastColumn()
-    const maxColumns = sheet.getMaxColumns()
-    const columnsToRemove = maxColumns - desiredColumns
-    if (columnsToRemove > 0) {
-      sheet.deleteColumns(desiredColumns + 1, columnsToRemove)
-    }
     return sheet
   }
 
