@@ -1,12 +1,10 @@
-namespace SheetToObjectMapper {
-  export interface SheetToObjectMapperInterface {
-    getAllObjects: () => GenericObject[];
-    getObject: (rowIndex: number) => GenericObject | null;
-    getObjectBatch: (startRowIndex: number, finishRowIndex: number) => GenericObject[];
-    getHeaderMap: () => HeaderMap | null;
-  }
+type SheetCellValue = string | number | boolean | Date;
+type SheetRow = SheetCellValue[];
+type GenericObject = Record<string, SheetCellValue>;
+type HeaderMap = Record<string, number>;
 
-  export class SheetToObjectMapper implements SheetToObjectMapperInterface {
+namespace SheetToObjectMapper {
+  export class SheetToObjectMapper {
     headerMap: HeaderMap
     sheetRows: SheetRow[]
 
@@ -23,80 +21,69 @@ namespace SheetToObjectMapper {
       if (this.sheetRows.length < 1) {
         throw new Error('Empty sheet')
       }
-      this.headerMap = createHeaderMap(this.sheetRows[0])
+      this.headerMap = this.createHeaderMap(this.sheetRows[0])
     }
 
     getAllObjects(): GenericObject[] {
-      return createObjectList(this.headerMap, this.sheetRows)
+      return this.createObjectList()
     }
 
     getObject(rowIndex: number): GenericObject | null {
-      return createObjectFromRow(this.headerMap, this.sheetRows, rowIndex)
+      return this.createObjectFromRow(rowIndex)
     }
 
     getObjectBatch(startRowIndex: number, finishRowIndex: number): GenericObject[] {
-      return createObjectList(this.headerMap, this.sheetRows, startRowIndex, finishRowIndex)
+      return this.createObjectList(startRowIndex, finishRowIndex)
     }
 
     getHeaderMap(): HeaderMap | null {
       return Util.deepCopy(this.headerMap)
     }
-  }
-}
 
-function createObjectList(
-  headerMap: HeaderMap,
-  sheetRows: SheetRow[],
-  startRowIndex = Number.MIN_SAFE_INTEGER,
-  finishRowIndex = Number.MAX_SAFE_INTEGER,
-): GenericObject[] {
-  const objectList: GenericObject[] = []
-  startRowIndex = Math.max(startRowIndex, 1)
-  finishRowIndex = Math.min(finishRowIndex, sheetRows.length)
-  for (let rowIndex = startRowIndex; rowIndex < finishRowIndex; rowIndex++) {
-    const genericObject: GenericObject = createObject(headerMap, sheetRows[rowIndex])
-    objectList.push(genericObject)
-  }
-  return objectList
-}
+    private createObjectList(startRowIndex?: number, finishRowIndex?: number): GenericObject[] {
+      startRowIndex = startRowIndex ?? Number.MIN_SAFE_INTEGER
+      finishRowIndex = finishRowIndex ?? Number.MAX_SAFE_INTEGER
+      const objectList: GenericObject[] = []
+      startRowIndex = Math.max(startRowIndex, 1)
+      finishRowIndex = Math.min(finishRowIndex, this.sheetRows.length)
+      for (let rowIndex = startRowIndex; rowIndex < finishRowIndex; rowIndex++) {
+        const genericObject: GenericObject = this.createObject(this.sheetRows[rowIndex])
+        objectList.push(genericObject)
+      }
+      return objectList
+    }
 
-function createObject(
-  headerMap: HeaderMap,
-  sheetRow: SheetRow,
-): GenericObject {
-  const genericObject: GenericObject = {}
-  for (const [columnName, columnIndex] of Object.entries(headerMap)) {
-    const cellContent = sheetRow[columnIndex]
-    if (cellContent !== undefined && cellContent !== null && cellContent !== '') {
-      genericObject[columnName] = cellContent
+    private createObject(sheetRow: SheetRow,): GenericObject {
+      const genericObject: GenericObject = {}
+      for (const [columnName, columnIndex] of Object.entries(this.headerMap)) {
+        const cellContent = sheetRow[columnIndex]
+        if (cellContent !== undefined && cellContent !== null && cellContent !== '') {
+          genericObject[columnName] = cellContent
+        }
+      }
+      return genericObject
+    }
+
+    private createHeaderMap(sheetHeaderRow: SheetRow): HeaderMap {
+      if (!sheetHeaderRow || sheetHeaderRow.length === 0) {
+        throw new Error('Empty header row')
+      }
+      const headerMap: HeaderMap = {}
+      sheetHeaderRow.forEach((sheetCellValue, columnIndex) => {
+        if (typeof sheetCellValue !== 'string') {
+          throw new Error(`Unexpected column name type at index ${columnIndex}`)
+        }
+        headerMap[sheetCellValue] = columnIndex
+      })
+      return headerMap
+    }
+
+    private createObjectFromRow(rowIndex: number) {
+      const objectList = this.createObjectList(rowIndex, rowIndex)
+      if (objectList.length === 0) {
+        return null
+      }
+      return objectList[0]
     }
   }
-  return genericObject
 }
-
-function createHeaderMap(sheetHeaderRow: SheetRow): HeaderMap {
-  if (!sheetHeaderRow || sheetHeaderRow.length === 0) {
-    throw new Error('Empty header row')
-  }
-  const headerMap: HeaderMap = {}
-  sheetHeaderRow.forEach((sheetCellValue, columnIndex) => {
-    if (typeof sheetCellValue !== 'string') {
-      throw new Error(`Unexpected column name type at index ${columnIndex}`)
-    }
-    headerMap[sheetCellValue] = columnIndex
-  })
-  return headerMap
-}
-
-function createObjectFromRow(headerMap: HeaderMap, sheetRows: SheetRow[], rowIndex: number) {
-  const objectList = createObjectList(headerMap, sheetRows, rowIndex, rowIndex)
-  if (objectList.length === 0) {
-    return null
-  }
-  return objectList[0]
-}
-
-type SheetCellValue = string | number | boolean | Date;
-type SheetRow = SheetCellValue[];
-type GenericObject = Record<string, SheetCellValue>;
-type HeaderMap = Record<string, number>;

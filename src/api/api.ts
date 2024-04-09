@@ -1,17 +1,10 @@
-export function createObjectToSheetMapper(
-  sheetName: string,
-  header: string[],
-  spreadsheetIdOrURL?: string,
-): ObjectToSheetMapper.ObjectToSheetMapperInterface {
+export function createObjectToSheetMapper(sheetName: string, header: string[], spreadsheetIdOrURL?: string) {
   return new ObjectToSheetMapper.ObjectToSheetMapper(
     sheetName, header, spreadsheetIdOrURL
   )
 }
 
-export function createSheetToObjectMapper(
-  sheetName: string,
-  spreadsheetIdOrURL?: string,
-): SheetToObjectMapper.SheetToObjectMapperInterface {
+export function createSheetToObjectMapper(sheetName: string, spreadsheetIdOrURL?: string) {
   return new SheetToObjectMapper.SheetToObjectMapper(
     sheetName, spreadsheetIdOrURL
   )

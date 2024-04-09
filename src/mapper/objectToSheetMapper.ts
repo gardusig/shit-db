@@ -1,9 +1,5 @@
 namespace ObjectToSheetMapper {
-    export interface ObjectToSheetMapperInterface {
-        appendObject: (obj: GenericObject, rowIndex: number) => void;
-        appendObjects: (objs: GenericObject[], startIndex: number) => void;
-    }
-    export class ObjectToSheetMapper implements ObjectToSheetMapperInterface {
+    export class ObjectToSheetMapper {
         sheet: GoogleAppsScript.Spreadsheet.Sheet
         header: string[]
 
@@ -17,36 +13,27 @@ namespace ObjectToSheetMapper {
         }
 
         appendObject(obj: GenericObject): void {
-            appendObject(obj, this.sheet, this.header)
+            const serializedObject = this.getSerializedObject(obj)
+            this.sheet.appendRow(serializedObject)
         }
 
         appendObjects(objs: GenericObject[]): void {
-            appendObjects(objs, this.sheet, this.header)
+            objs.forEach(obj => { this.appendObject(obj) })
+        }
+
+        trimSheetRows(): void {
+            const lastRowWithData = this.sheet.getLastRow()
+            const maxRows = this.sheet.getMaxRows()
+            const numRowsToRemove = maxRows - lastRowWithData
+            if (numRowsToRemove > 0) {
+                this.sheet.deleteRows(lastRowWithData + 1, numRowsToRemove)
+            }
+        }
+
+        private getSerializedObject(obj: GenericObject): any[] {
+            const serializedObject: any[] = []
+            this.header.forEach(key => { serializedObject.push(obj[key]) })
+            return serializedObject
         }
     }
-}
-
-function appendObject(obj: GenericObject, sheet: GoogleAppsScript.Spreadsheet.Sheet, header: string[]): void {
-    const serializedObject = getSerializedObject(obj, header)
-    sheet.appendRow(serializedObject)
-}
-
-function appendObjects(objs: GenericObject[], sheet: GoogleAppsScript.Spreadsheet.Sheet, header: string[]): void {
-    objs.forEach(obj => {
-        appendObject(obj, sheet, header)
-    })
-    const lastRowWithData = sheet.getLastRow()
-    const maxRows = sheet.getMaxRows()
-    const numRowsToRemove = maxRows - lastRowWithData
-    if (numRowsToRemove > 0) {
-        sheet.deleteRows(lastRowWithData + 1, numRowsToRemove)
-    }
-}
-
-function getSerializedObject(obj: GenericObject, header: string[]): any[] {
-    const serializedObject: any[] = []
-    header.forEach(headerKey => {
-        serializedObject.push(obj[headerKey])
-    })
-    return serializedObject
 }
