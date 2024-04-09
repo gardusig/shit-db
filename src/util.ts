@@ -25,10 +25,7 @@ namespace Util {
     return SpreadsheetApp.getActiveSpreadsheet()
   }
 
-  export function createSheet(sheetName: string, header: string[], spreadsheet?: GoogleAppsScript.Spreadsheet.Spreadsheet): GoogleAppsScript.Spreadsheet.Sheet {
-    if (spreadsheet === undefined) {
-      spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
-    }
+  export function createSheet(sheetName: string, header: string[], spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): GoogleAppsScript.Spreadsheet.Sheet {
     let sheet = spreadsheet.getSheetByName(sheetName)
     if (sheet) {
       sheet.clear()
@@ -44,10 +41,10 @@ namespace Util {
     }
     return sheet
   }
-}
 
-function isSpreadsheetUrl(value: string): boolean {
-  return value.includes('spreadsheets.google.com')
+  export function isSpreadsheetUrl(value: string): boolean {
+    return value.includes('spreadsheets.google.com')
+  }
 }
 
 type DeepCopyable = Record<string, any> | any[]
