@@ -38,9 +38,13 @@ namespace Util {
     sheet.appendRow(header)
     const desiredNumColumns = header.length
     const currentNumColumns = sheet.getLastColumn()
+    Logger.log(`desiredNumColumns: ${desiredNumColumns}, currentNumColumns: ${currentNumColumns}`)
     if (currentNumColumns > desiredNumColumns) {
+      Logger.log(`desiredNumColumns + 1: ${desiredNumColumns + 1}, currentNumColumns - desiredNumColumns: ${currentNumColumns - desiredNumColumns}`)
       sheet.deleteColumns(desiredNumColumns + 1, currentNumColumns - desiredNumColumns)
     }
+    const afterNumColumns = sheet.getLastColumn()
+    Logger.log(`afterNumColumns: ${afterNumColumns}`)
     return sheet
   }
 }
