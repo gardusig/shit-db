@@ -1,17 +1,27 @@
 namespace ObjectToSheetMapper {
-    export function createObjectToSheetMapper(
-        sheetName: string, header: string[], spreadsheetIdOrURL?: string,
-    ): ObjectToSheetMapper {
-        const spreadsheet = Util.getSpreadsheet(spreadsheetIdOrURL)
-        if (spreadsheet === null) {
-            throw new Error(`Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`)
+    export interface ObjectToSheetMapperInterface {
+        appendObject: (obj: GenericObject, rowIndex: number) => void;
+        appendObjects: (objs: GenericObject[], startIndex: number) => void;
+    }
+    export class ObjectToSheetMapper implements ObjectToSheetMapperInterface {
+        sheet: GoogleAppsScript.Spreadsheet.Sheet
+        header: string[]
+
+        constructor(sheetName: string, header: string[], spreadsheetIdOrURL?: string) {
+            const spreadsheet = Util.getSpreadsheet(spreadsheetIdOrURL)
+            if (spreadsheet === null) {
+                throw new Error(`Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`)
+            }
+            this.sheet = Util.createSheet(sheetName, header, spreadsheet)
+            this.header = header
         }
-        const sheet = Util.createSheet(sheetName, header, spreadsheet)
-        return {
-            appendObject: (obj: GenericObject) =>
-                appendObject(obj, sheet, header),
-            appendObjects: (objs: GenericObject[]) =>
-                appendObjects(objs, sheet, header),
+
+        appendObject(obj: GenericObject): void {
+            appendObject(obj, this.sheet, this.header)
+        }
+
+        appendObjects(objs: GenericObject[]): void {
+            appendObjects(objs, this.sheet, this.header)
         }
     }
 }
@@ -25,6 +35,13 @@ function appendObjects(objs: GenericObject[], sheet: GoogleAppsScript.Spreadshee
     objs.forEach(obj => {
         appendObject(obj, sheet, header)
     })
+    const lastRowWithData = sheet.getLastRow()
+    const maxRows = sheet.getMaxRows()
+    const numRowsToRemove = maxRows - lastRowWithData
+    Logger.log(`lastRowWithData: ${lastRowWithData}, maxRows: ${maxRows}, numRowsToRemove: ${numRowsToRemove}`)
+    if (numRowsToRemove > 0) {
+        sheet.deleteRows(lastRowWithData + 1, numRowsToRemove)
+    }
 }
 
 function getSerializedObject(obj: GenericObject, header: string[]): any[] {
@@ -33,9 +50,4 @@ function getSerializedObject(obj: GenericObject, header: string[]): any[] {
         serializedObject.push(obj[headerKey])
     })
     return serializedObject
-}
-
-interface ObjectToSheetMapper {
-    appendObject: (obj: GenericObject, rowIndex: number) => void;
-    appendObjects: (objs: GenericObject[], startIndex: number) => void;
 }

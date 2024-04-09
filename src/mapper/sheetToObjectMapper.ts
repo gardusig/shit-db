@@ -1,30 +1,45 @@
 namespace SheetToObjectMapper {
-  export function createSheetToObjectMapper(
-    sheetName: string,
-    spreadsheetIdOrURL?: string,
-  ): SheetToObjectMapperInterface {
-    const spreadsheet = Util.getSpreadsheet(spreadsheetIdOrURL)
-    if (spreadsheet === null) {
-      throw new Error(`Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`)
+  export interface SheetToObjectMapperInterface {
+    getAllObjects: () => GenericObject[];
+    getObject: (rowIndex: number) => GenericObject | null;
+    getObjectBatch: (startRowIndex: number, finishRowIndex: number) => GenericObject[];
+    getHeaderMap: () => HeaderMap | null;
+  }
+
+  export class SheetToObjectMapper implements SheetToObjectMapperInterface {
+    headerMap: HeaderMap
+    sheetRows: SheetRow[]
+
+    constructor(sheetName: string, spreadsheetIdOrURL?: string) {
+      const spreadsheet = Util.getSpreadsheet(spreadsheetIdOrURL)
+      if (spreadsheet === null) {
+        throw new Error(`Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`)
+      }
+      const sheet = spreadsheet.getSheetByName(sheetName)
+      if (sheet === null) {
+        throw new Error(`Sheet '${sheetName}' not found.`)
+      }
+      this.sheetRows = sheet.getDataRange().getValues()
+      if (this.sheetRows.length < 1) {
+        throw new Error('Empty sheet')
+      }
+      this.headerMap = createHeaderMap(this.sheetRows[0])
     }
-    const sheet = spreadsheet.getSheetByName(sheetName)
-    if (sheet === null) {
-      throw new Error(`Sheet '${sheetName}' not found.`)
+
+    getAllObjects(): GenericObject[] {
+      return createObjectList(this.headerMap, this.sheetRows)
     }
-    const sheetRows: SheetRow[] = sheet.getDataRange().getValues()
-    if (sheetRows.length < 1) {
-      throw new Error('Empty sheet')
+
+    getObject(rowIndex: number): GenericObject | null {
+      return createObjectFromRow(this.headerMap, this.sheetRows, rowIndex)
     }
-    const headerMap = createHeaderMap(sheetRows[0])
-    return {
-      getAllObjects: () =>
-        createObjectList(headerMap, sheetRows),
-      getObject: (rowIndex: number) =>
-        createObjectFromRow(headerMap, sheetRows, rowIndex),
-      getObjectBatch: (startRowIndex: number, finishRowIndex: number) =>
-        createObjectList(headerMap, sheetRows, startRowIndex, finishRowIndex),
-      getHeaderMap: () =>
-        Util.deepCopy(headerMap),
+
+    getObjectBatch(startRowIndex: number, finishRowIndex: number): GenericObject[] {
+      return createObjectList(this.headerMap, this.sheetRows, startRowIndex, finishRowIndex)
+    }
+
+    getHeaderMap(): HeaderMap | null {
+      return Util.deepCopy(this.headerMap)
     }
   }
 }
@@ -85,10 +100,3 @@ type SheetCellValue = string | number | boolean | Date;
 type SheetRow = SheetCellValue[];
 type GenericObject = Record<string, SheetCellValue>;
 type HeaderMap = Record<string, number>;
-
-interface SheetToObjectMapperInterface {
-  getAllObjects: () => GenericObject[];
-  getObject: (rowIndex: number) => GenericObject | null;
-  getObjectBatch: (startRowIndex: number, finishRowIndex: number) => GenericObject[];
-  getHeaderMap: () => HeaderMap | null;
-}

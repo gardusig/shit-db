@@ -36,15 +36,13 @@ namespace Util {
       sheet = spreadsheet.insertSheet(sheetName)
     }
     sheet.appendRow(header)
-    const desiredNumColumns = header.length
-    const currentNumColumns = sheet.getLastColumn()
-    Logger.log(`desiredNumColumns: ${desiredNumColumns}, currentNumColumns: ${currentNumColumns}`)
-    if (currentNumColumns > desiredNumColumns) {
-      Logger.log(`desiredNumColumns + 1: ${desiredNumColumns + 1}, currentNumColumns - desiredNumColumns: ${currentNumColumns - desiredNumColumns}`)
-      sheet.deleteColumns(desiredNumColumns + 1, currentNumColumns - desiredNumColumns)
+    const desiredColumns = sheet.getLastColumn()
+    const maxColumns = sheet.getMaxColumns()
+    const columnsToRemove = maxColumns - desiredColumns
+    Logger.log(`desiredColumns: ${desiredColumns}, maxColumns: ${maxColumns}, columnsToRemove: ${columnsToRemove}`)
+    if (columnsToRemove > 0) {
+      sheet.deleteColumns(desiredColumns + 1, columnsToRemove)
     }
-    const afterNumColumns = sheet.getLastColumn()
-    Logger.log(`afterNumColumns: ${afterNumColumns}`)
     return sheet
   }
 }
