@@ -39,7 +39,6 @@ namespace Util {
     const desiredColumns = sheet.getLastColumn()
     const maxColumns = sheet.getMaxColumns()
     const columnsToRemove = maxColumns - desiredColumns
-    Logger.log(`desiredColumns: ${desiredColumns}, maxColumns: ${maxColumns}, columnsToRemove: ${columnsToRemove}`)
     if (columnsToRemove > 0) {
       sheet.deleteColumns(desiredColumns + 1, columnsToRemove)
     }

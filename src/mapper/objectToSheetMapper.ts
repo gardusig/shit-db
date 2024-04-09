@@ -38,7 +38,6 @@ function appendObjects(objs: GenericObject[], sheet: GoogleAppsScript.Spreadshee
     const lastRowWithData = sheet.getLastRow()
     const maxRows = sheet.getMaxRows()
     const numRowsToRemove = maxRows - lastRowWithData
-    Logger.log(`lastRowWithData: ${lastRowWithData}, maxRows: ${maxRows}, numRowsToRemove: ${numRowsToRemove}`)
     if (numRowsToRemove > 0) {
         sheet.deleteRows(lastRowWithData + 1, numRowsToRemove)
     }
