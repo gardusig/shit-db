@@ -67,3 +67,36 @@ The `SheetToObjectMapper` class provides functionality to map Google Sheets data
 
 - Ensure that the necessary permissions are granted to the Google Sheets API for the script to access the spreadsheet.
 - This library assumes familiarity with Google Apps Script and basic JavaScript concepts.
+
+## Examples
+
+```
+// Define a function to get a list of objects from a sheet
+export function getObjectList<T>(sheetName: string): T[] {
+    // Create a SheetToObjectMapper instance for the specified sheet
+    const sheetMapper = new ShitDb.SheetToObjectMapper.SheetToObjectMapper(sheetName);
+
+    // Retrieve all objects from the specified sheet
+    const objectList = sheetMapper.getAllObjects() as T[];
+
+    // Return the list of objects
+    return objectList;
+}
+
+// Example usage:
+// Assume you have a sheet named 'StockTransactions' with data in it
+// Define an interface representing the structure of the objects in the sheet
+interface StockTransaction {
+    ticker: string;
+    side: string;
+    quantity: number;
+    total: string;
+    price: string;
+}
+
+// Retrieve the list of stock transactions from the 'StockTransactions' sheet
+const stockTransactions = getObjectList<StockTransaction>('StockTransactions');
+
+// Log the retrieved list of stock transactions
+console.log(stockTransactions);
+```
