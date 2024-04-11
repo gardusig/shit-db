@@ -70,7 +70,7 @@ The `SheetToObjectMapper` class provides functionality to map Google Sheets data
 
 ## Examples
 
-```
+```ts
 // Define a function to get a list of objects from a sheet
 export function getObjectList<T>(sheetName: string): T[] {
     // Create a SheetToObjectMapper instance for the specified sheet
