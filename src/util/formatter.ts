@@ -1,24 +1,22 @@
-namespace ObjectToSheetMapper {
-    export class ObjectToSheetMapper {
+namespace Util {
+    export class Formatter {
         sheet: GoogleAppsScript.Spreadsheet.Sheet
-        header: string[]
 
-        constructor(sheetName: string, header: string[], spreadsheetIdOrURL?: string) {
+        constructor(sheetName: string, spreadsheetIdOrURL?: string) {
             const spreadsheet = Util.getSpreadsheet(spreadsheetIdOrURL)
             if (spreadsheet === null) {
                 throw new Error(`Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`)
             }
-            this.sheet = Util.createSheet(sheetName, header, spreadsheet)
-            this.header = header
+            const sheet = spreadsheet.getSheetByName(sheetName)
+            if (sheet === null) {
+                throw new Error(`Sheet '${sheetName}' not found.`)
+            }
+            this.sheet = sheet
         }
 
-        appendObject(obj: GenericObject): void {
-            const serializedObject = this.getSerializedObject(obj)
-            this.sheet.appendRow(serializedObject)
-        }
-
-        appendObjects(objs: GenericObject[]): void {
-            objs.forEach(obj => { this.appendObject(obj) })
+        trim(): void {
+            this.trimColumns()
+            this.trimRows()
         }
 
         trimRows(): void {
@@ -37,12 +35,6 @@ namespace ObjectToSheetMapper {
             if (columnsToRemove > 0) {
                 this.sheet.deleteColumns(lastColumnWithData + 1, columnsToRemove)
             }
-        }
-
-        private getSerializedObject(obj: GenericObject): any[] {
-            const serializedObject: any[] = []
-            this.header.forEach(key => { serializedObject.push(obj[key]) })
-            return serializedObject
         }
     }
 }
