@@ -4,5 +4,6 @@
     "statusBar.noFolderBackground": "#0f9d58",
     "statusBar.debuggingBackground": "#0f9d58",
     "activityBar.background": "#0f9d58",
-  }
+  },
+  "CodeGPT.apiKey": "CodeGPT Plus Beta"
 }

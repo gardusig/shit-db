@@ -1,20 +1,20 @@
 namespace Mapper {
   export class ObjectToSheet {
-    sheet: GoogleAppsScript.Spreadsheet.Sheet;
-    header: string[];
+    private readonly sheet: GoogleAppsScript.Spreadsheet.Sheet;
+    private readonly header: string[];
 
     constructor(
       sheetName: string,
       header: string[],
       spreadsheetIdOrURL?: string,
     ) {
-      const spreadsheet = Util.getSpreadsheet(spreadsheetIdOrURL);
+      const spreadsheet = Util.Sheet.getSpreadsheet(spreadsheetIdOrURL);
       if (spreadsheet === null) {
         throw new Error(
           `Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`,
         );
       }
-      this.sheet = Util.createSheet(sheetName, header, spreadsheet);
+      this.sheet = Util.Sheet.createSheet(sheetName, header, spreadsheet);
       this.header = header;
     }
 

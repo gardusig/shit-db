@@ -1,20 +1,4 @@
-namespace Util {
-  export function deepCopy<T extends DeepCopyable>(obj: T | null): T | null {
-    if (obj === null || typeof obj !== "object") {
-      return obj;
-    }
-    if (Array.isArray(obj)) {
-      return obj.map((element) => deepCopy(element)) as T;
-    }
-    const newObj = {} as T;
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        newObj[key] = deepCopy((obj as any)[key]);
-      }
-    }
-    return newObj;
-  }
-
+namespace Util.Sheet {
   export function getSpreadsheet(
     spreadsheetIdOrURL?: string,
   ): GoogleAppsScript.Spreadsheet.Spreadsheet | null {
@@ -40,9 +24,7 @@ namespace Util {
     return sheet;
   }
 
-  export function isSpreadsheetUrl(value: string): boolean {
+  function isSpreadsheetUrl(value: string): boolean {
     return value.includes("spreadsheets.google.com");
   }
 }
-
-type DeepCopyable = Record<string, any> | any[];

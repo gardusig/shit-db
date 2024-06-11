@@ -1,9 +1,9 @@
 namespace Util {
   export class Formatter {
-    sheet: GoogleAppsScript.Spreadsheet.Sheet;
+    private readonly sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
     constructor(sheetName: string, spreadsheetIdOrURL?: string) {
-      const spreadsheet = Util.getSpreadsheet(spreadsheetIdOrURL);
+      const spreadsheet = Util.Sheet.getSpreadsheet(spreadsheetIdOrURL);
       if (spreadsheet === null) {
         throw new Error(
           `Failed to find spreadsheet for ID or URL '${spreadsheetIdOrURL}'`,
